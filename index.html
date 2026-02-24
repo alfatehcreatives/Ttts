@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Memoir | Private Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 overflow-x-hidden">
+
+    <!-- Auth Lock Screen -->
+    <div id="lockScreen" class="fixed inset-0 z-[100] bg-slate-50 flex items-center justify-center p-4">
+        <div id="lockBox" class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm text-center border border-slate-100">
+            <div class="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-white text-3xl shadow-lg shadow-slate-200">
+                <i class="fas fa-shield-heart"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">Private Memoir</h1>
+            <p class="text-slate-500 mb-8 text-sm">Enter your personal passcode</p>
+            <form id="lockForm" class="space-y-4">
+                <input type="password" id="passcode" inputmode="numeric" maxlength="4" class="w-full text-center text-4xl tracking-[0.5em] py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-slate-900 outline-none transition-all placeholder:tracking-normal placeholder:text-xl" placeholder="••••">
+                <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold hover:bg-slate-800 active:scale-95 transition-all shadow-lg shadow-slate-200">Unlock</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App UI -->
+    <div id="appUI" class="hidden h-screen flex flex-col lg:flex-row overflow-hidden">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 z-40 lg:hidden hidden backdrop-blur-sm"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar-transition fixed lg:relative inset-y-0 left-0 w-[280px] bg-white border-r border-slate-100 z-50 transform -translate-x-full lg:translate-x-0 flex flex-col">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white"><i class="fas fa-heart text-xs"></i></div>
+                        <span class="text-xl font-bold tracking-tight">Memoir.</span>
+                    </div>
+                    <button id="closeSidebar" class="lg:hidden p-2 text-slate-400"><i class="fas fa-times"></i></button>
+                </div>
+                <nav class="space-y-1">
+                    <a href="#" class="nav-item flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-slate-900 text-white shadow-lg shadow-slate-200 font-semibold"><i class="fas fa-columns w-5"></i> Dashboard</a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-500 hover:bg-slate-50 font-medium"><i class="fas fa-calendar-day w-5"></i> Milestones</a>
+                    <a href="#" class="nav-item flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-500 hover:bg-slate-50 font-medium"><i class="fas fa-images w-5"></i> Gallery</a>
+                </nav>
+            </div>
+            
+            <div class="mt-auto p-6 border-t border-slate-100">
+                <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl mb-4">
+                    <img id="userAvatarSide" src="" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+                    <div class="overflow-hidden">
+                        <p id="userNameSide" class="text-sm font-bold truncate">User</p>
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Online</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 font-bold transition-colors">
+                    <i class="fas fa-power-off w-5"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 bg-[#F8FAFC]">
+            <!-- Header -->
+            <header class="h-20 glass border-b border-slate-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button id="menuBtn" class="lg:hidden w-10 h-10 flex items-center justify-center bg-white border border-slate-100 rounded-xl shadow-sm"><i class="fas fa-bars"></i></button>
+                    <h2 class="text-lg lg:text-xl font-bold">Timeline</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="userProfile" class="flex items-center gap-3 bg-white border border-slate-100 p-1.5 pr-4 rounded-full shadow-sm">
+                        <img id="userAvatarHead" src="" class="w-8 h-8 rounded-full shadow-sm">
+                        <span id="userNameHead" class="text-xs font-bold hidden sm:block">User</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+                <div class="max-w-5xl mx-auto space-y-6">
+                    <!-- Stat Cards -->
+                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        <div class="p-5 lg:p-6 rounded-[2rem] bg-slate-900 text-white shadow-xl">
+                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Days</p>
+                            <h3 class="text-2xl lg:text-3xl font-bold">1,248</h3>
+                        </div>
+                        <div class="p-5 lg:p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Memories</p>
+                            <h3 id="memCount" class="text-2xl lg:text-3xl font-bold">0</h3>
+                        </div>
+                        <div class="p-5 lg:p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm col-span-2 lg:col-span-1">
+                            <button id="openModalBtn" class="w-full h-full flex items-center justify-center gap-3 font-bold text-slate-600 hover:text-slate-900">
+                                <span class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100"><i class="fas fa-plus"></i></span>
+                                New Memory
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Table -->
+                    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left min-w-[500px]">
+                                <thead class="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <tr>
+                                        <th class="p-6">Moment</th>
+                                        <th class="p-6">Date</th>
+                                        <th class="p-6 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memoryTable" class="divide-y divide-slate-50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" id="closeModal"></div>
+        <div class="bg-white rounded-[2.5rem] p-6 lg:p-8 w-full max-w-md relative z-10 shadow-2xl border border-slate-100">
+            <h3 class="text-xl lg:text-2xl font-bold mb-6">New Memory</h3>
+            <form id="memoryForm" class="space-y-4">
+                <input required type="text" id="memTitle" placeholder="What's the memory?" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-900 transition-all">
+                <input required type="date" id="memDate" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-slate-900 transition-all">
+                <select id="memType" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none appearance-none">
+                    <option value="memory">Default Memory</option>
+                    <option value="milestone">Important Milestone</option>
+                    <option value="travel">Travel Trip</option>
+                </select>
+                <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-xl active:scale-95 transition-all mt-4">Save to Timeline</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDy1CU1jmLogWoCOCL4vdMQk1LU9BqUnN0",
+            authDomain: "lovememoir.firebaseapp.com",
+            projectId: "lovememoir",
+            storageBucket: "lovememoir.firebasestorage.app",
+            messagingSenderId: "807770293523",
+            appId: "1:807770293523:web:8ba05fe201c64c7608c6e6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = "lovememoir-v1";
+
+        const USERS = {
+            "1234": { name: "Boy", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" },
+            "4321": { name: "Girl", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily" }
+        };
+
+        const DOM = {
+            lockScreen: document.getElementById('lockScreen'),
+            lockBox: document.getElementById('lockBox'),
+            appUI: document.getElementById('appUI'),
+            modal: document.getElementById('modal'),
+            table: document.getElementById('memoryTable'),
+            sidebar: document.getElementById('sidebar'),
+            overlay: document.getElementById('sidebarOverlay')
+        };
+
+        // Check Session
+        const activeSession = JSON.parse(sessionStorage.getItem('memoir_user'));
+        if (activeSession) unlock(activeSession);
+
+        // Lock Logic
+        document.getElementById('lockForm').onsubmit = (e) => {
+            e.preventDefault();
+            const code = document.getElementById('passcode').value;
+            if (USERS[code]) {
+                sessionStorage.setItem('memoir_user', JSON.stringify(USERS[code]));
+                unlock(USERS[code]);
+            } else {
+                DOM.lockBox.classList.add('shake');
+                setTimeout(() => DOM.lockBox.classList.remove('shake'), 400);
+                document.getElementById('passcode').value = '';
+            }
+        };
+
+        function unlock(user) {
+            document.getElementById('userNameHead').innerText = user.name;
+            document.getElementById('userNameSide').innerText = user.name;
+            document.getElementById('userAvatarHead').src = user.avatar;
+            document.getElementById('userAvatarSide').src = user.avatar;
+            
+            DOM.lockScreen.classList.add('hidden');
+            DOM.appUI.classList.remove('hidden');
+            initData();
+        }
+
+        // Sidebar Controls
+        const toggleSidebar = () => {
+            DOM.sidebar.classList.toggle('-translate-x-full');
+            DOM.overlay.classList.toggle('hidden');
+        };
+        document.getElementById('menuBtn').onclick = toggleSidebar;
+        document.getElementById('closeSidebar').onclick = toggleSidebar;
+        DOM.overlay.onclick = toggleSidebar;
+
+        document.getElementById('logoutBtn').onclick = () => {
+            sessionStorage.clear();
+            location.reload();
+        };
+
+        // CRUD Logic
+        async function initData() {
+            await signInAnonymously(auth);
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'memories'));
+            onSnapshot(q, (snap) => {
+                DOM.table.innerHTML = '';
+                const items = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                document.getElementById('memCount').innerText = items.length;
+                
+                items.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'group hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-6"><p class="font-bold text-slate-800 text-sm sm:text-base">${m.title}</p></td>
+                        <td class="p-6 text-xs sm:text-sm font-medium text-slate-500">${new Date(m.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</td>
+                        <td class="p-6 text-right">
+                            <button onclick="window.delMem('${m.id}')" class="w-8 h-8 rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    `;
+                    DOM.table.appendChild(tr);
+                });
+            });
+        }
+
+        document.getElementById('openModalBtn').onclick = () => DOM.modal.classList.remove('hidden');
+        document.getElementById('closeModal').onclick = () => DOM.modal.classList.add('hidden');
+
+        document.getElementById('memoryForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const user = JSON.parse(sessionStorage.getItem('memoir_user'));
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'memories'), {
+                title: document.getElementById('memTitle').value,
+                date: document.getElementById('memDate').value,
+                type: document.getElementById('memType').value,
+                author: user.name,
+                ts: serverTimestamp()
+            });
+            DOM.modal.classList.add('hidden');
+            e.target.reset();
+        };
+
+        window.delMem = async (id) => {
+            if (confirm('Permanently delete this memory?')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'memories', id));
+            }
+        };
+    </script>
+</body>
+</html>
+
+  
